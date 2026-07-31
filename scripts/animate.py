@@ -4,14 +4,14 @@ import matplotlib.animation as animation
 import os
 
 # Params
-step_max = 1000
-step_interval = 100
+step_max = 2000
+step_interval = 20
 frames = range(0, step_max, step_interval)
 
 # Figure setup
 fig, ax = plt.subplots(figsize=(8, 5))
 ax.set_xlim(-20, 20)      # Space domain of the schrodinger simulation
-ax.set_ylim(0, 2.0)       # Relative to max height of the packet from pdf gained in the c++ simulation
+ax.set_ylim(0, 1.0)       # Relative to max height of the packet from pdf gained in the c++ simulation
 ax.set_xlabel("Position (x)")
 ax.set_ylabel("Probability Density Function |ψ|²")
 ax.set_title("Quantum Wavepacket Evolution")
@@ -23,7 +23,7 @@ ax.legend()
 
 # Function updating the animation at each frame
 def update(step):
-    filename = f"output_{step}.dat"
+    filename = f"../data/output/output_{step}.dat"
     if os.path.exists(filename):
         # Data: column 0 = x, column 1 = prob
         data = np.loadtxt(filename)
@@ -33,7 +33,7 @@ def update(step):
     return linea,
 
 # Animation
-anim = animation.FuncAnimation(fig, update, frames=frames, interval=100, blit=True)
+anim = animation.FuncAnimation(fig, update, frames=frames, interval=300, blit=True)
 
 # Save as GIF
 print("GIF generation...")

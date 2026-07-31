@@ -5,7 +5,6 @@
 #include <cuComplex.h>
 #include <cufft.h>
 #include <fstream>
-#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -47,64 +46,53 @@ __global__ void apply_kinetic(cuDoubleComplex* d_psi, const double* d_p, double 
 }
 
 int main() {
-    const int N = 2048;                 
-    const double L = 40.0;              
+    // Global params reading
+    ifstream file_params("../data/input/params.dat");
+    if (!file_params) {
+        cerr << "Error: params.dat unavailable. Check Python execution." << endl;
+        return 1;
+    }
     
-    // Compute spacial steps (dx) and momentum steps (dp)
-    // dp = 2*pi / L
-    const double dx = L / N ;            
-    const double dp = 2 * M_PI / L ;   
+    int N, num_steps;
+    double L, dt, m;
+    file_params >> N >> L >> dt >> m >> num_steps;
+    file_params.close();
 
-    const double dt = 0.01;
-    const int m = 1;
-    const int num_steps = 1000;
+    const double dx = L / N;            
+    const double dp = 2 * M_PI / L;   
 
-    /* Here the parameters that define the initial condition
-     * for the wavefunction are defined.                        */
-    const double x0 = -10.0;            
-    const double sigma = 1.0;           
-    const double p0 = 5.0; //=>The kinetic energy Ek in this case is 12.5, so we need V>12.5 to see tunnel effect  
-    
-    /* QUANTUM WALL PARAMETERS */
-    const double V0 = 15;
-    const double wall_start = 0.0;
-    const double wall_end   = 2.0;
+    vector<complex<double>> h_psi(N); 
+    vector<double> h_V(N);             
+    vector<double> h_p(N); 
 
-    vector<complex<double>> h_psi(N); // vector containing all the wavefunctions in each interval  
-    vector<double> h_V(N); //vector containing the potentials             
-    vector<double> h_p(N); //vector containing the positions used to map values to the output of FFT           
-
-    double total_prob = 0.0; 
-
-    // Iterate on each point (interval) of the discretized domain
+    // Potential
+    ifstream file_V("../data/input/potential.dat");
+    if (!file_V) { cerr << "Error in potential.dat opening" << endl; return 1; }
     for (int j = 0; j < N; j++) {
-        // Compute x in order to center the interval in 0
-        double x = - L / 2 + j * dx;
+        file_V >> h_V[j];
+    }
+    file_V.close();
 
-        // Determine the potential in that point
-        if(x >= wall_start && x <= wall_end){
-            h_V[j] = V0;
-        }else{
-            h_V[j] = 0.0;
+    // Initial Wavefunction
+    ifstream file_psi("../data/input/psi_0.dat");
+    if (!file_psi) { cerr << "Error opening psi_0.dat" << endl; return 1; }
+    for (int j = 0; j < N; j++) {
+        double real_part, imag_part;
+        file_psi >> real_part >> imag_part;
+        h_psi[j] = complex<double>(real_part, imag_part);
+    }
+    file_psi.close();
+
+    // Momentum array
+    for (int n = 0; n < N; n++) {
+        if (n < N / 2) {
+            h_p[n] = n * dp;
+        } else {
+            h_p[n] = (n - N) * dp;
         }
-        
-        double norm_factor = 1 / pow(2 * M_PI * sigma * sigma, 0.25);
-        double re_exp = - (x - x0) * (x - x0) / (4 * sigma * sigma);
-        complex<double> im_exp(0.0 ,  p0 * x); 
-        
-        // Put together the whole initial condition of the wavefunction
-        h_psi[j] = norm_factor * exp(re_exp) * exp(im_exp);
-
-        /* Add the norm of the current wavefunction to the 
-         * total_prob variable to take into account of
-         * a normalization factor in the end to impose ||\psi(x_j)||=1 for each j*/
-        total_prob += norm(h_psi[j]) * dx; 
     }
 
-    // Normalization
-    for (int j = 0; j < N; j++) {
-        h_psi[j] = h_psi[j] / sqrt(total_prob);
-    }
+    cout << "Setup loaded through Python. Params: N=" << N << " L=" << L << endl;
 
     // Sorting for FFT in momentum space
     for (int n = 0; n < N; n++) {
@@ -162,12 +150,12 @@ int main() {
         
 
         // Every 100 steps copy d_psi back to h_psi and save it to a file
-        if (step % 100 == 0) {
+        if (step % 20 == 0) {
             // Move updated array from GPU to CPU
             cudaMemcpy(h_psi.data(), d_psi, N * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
             
             // File preparation (eg: output_0.dat, output_100.dat)
-            string filename = "output_" + to_string(step) + ".dat";
+            string filename = "../data/output/output_" + to_string(step) + ".dat";
             ofstream file(filename);
             
             double total_prob = 0.0;
@@ -182,12 +170,12 @@ int main() {
                 
                 /* Format for GNUPlot/Matplotlib: "x probability potential" separated by a space
                    The value for potential is divided by 50 in order to ease the visual representation */
-                file << x << " " << prob_density << " " << h_V[j]/25 << "\n";
+                file << x << " " << prob_density << " " << h_V[j]/10 << "\n";
             }
             file.close();
-            sort(h_V.begin(),h_V.end());
+           
             // Terminal check to ensure total prob of each pdf is 1
-            cout << "Step: " << step << " | Norm: " << total_prob << " Max value of pdf: " << h_V.back() << endl;
+            cout << "Step: " << step << " | Norm: " << total_prob << endl;
         }
     }
 
