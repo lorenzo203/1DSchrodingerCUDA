@@ -2,6 +2,7 @@ import json
 import numpy as np
 import sys
 import os
+from scipy.special import eval_hermite
 
 def main():
     if len(sys.argv) < 2:
@@ -17,7 +18,7 @@ def main():
     N = config["N"]
     L = config["L"]
     x0 = config["x0"]
-    sigma = config["sigma"]
+    sigma = config.get("sigma", 1.0)
     p0 = config["p0"]
     
     dx = L / N
@@ -29,16 +30,36 @@ def main():
         start = config["barrier_start"]
         end = config["barrier_end"]
         height = config["barrier_height"]
-        # Apply it only for points inside the barrier
         V[(x >= start) & (x <= end)] = height
+    elif config["potential_type"] == "oscillator":
+        omega = config["omega"]
+        m = config["mass"]
+        V = 0.5 * m * omega**2 * x**2
 
     # Initial condition for position wavefunction \psi(x, 0)
-    norm_factor = 1.0 / (2.0 * np.pi * sigma**2)**0.25
-    re_exp = - (x - x0)**2 / (4.0 * sigma**2)
-    im_exp = p0 * x
-    
-    psi_complex = norm_factor * np.exp(re_exp) * np.exp(1j * im_exp)
-    
+    if config["potential_type"] == "oscillator" and "n_level" in config:
+        n = config["n_level"]
+        omega = config["omega"]
+        m = config["mass"]
+        
+        # Adimensional variable in the oscillator
+        alpha = np.sqrt(m * omega)
+        xi = alpha * (x - x0)
+        
+        # Hermite Polynomial * Gaussian Exponential
+        H_n = eval_hermite(n, xi)
+        exp_part = np.exp(-0.5 * xi**2)
+        
+        # Initial momentum p0
+        psi_complex = H_n * exp_part * np.exp(1j * p0 * x)
+    else:
+        # Fallback for free particle/barrier
+        sigma = config.get("sigma", 1.0)
+        norm_factor = 1.0 / (2.0 * np.pi * sigma**2)**0.25
+        re_exp = - (x - x0)**2 / (4.0 * sigma**2)
+        im_exp = p0 * x
+        psi_complex = norm_factor * np.exp(re_exp) * np.exp(1j * im_exp)
+        
     # Normalization
     prob_totale = np.sum(np.abs(psi_complex)**2) * dx
     psi_complex = psi_complex / np.sqrt(prob_totale)
