@@ -4,3 +4,4 @@ schrodinger
 *.o
 *.a
 *.DS_Store
+!assets/*.gif
