@@ -1,4 +1,4 @@
-# 1DCUDASchrodinger
+# 1DSchrodingerCUDA
 
 A high-performance computational framework for simulating the one-dimensional Time-Dependent Schrödinger Equation (TDSE) using GPU acceleration. 
 
