@@ -43,6 +43,11 @@ The algorithm proceeds at each time step as follows:
 
 By offloading the highly parallelizable element-wise vector multiplications and the FFT computations to the GPU via CUDA kernels and cuFFT, the simulation achieves massive speedups compared to standard CPU implementations.[cite: 1]
 > **Note on Boundary Conditions:** Because this numerical solver relies heavily on the Fast Fourier Transform (FFT), the spatial domain is inherently periodic. If a wavepacket travels beyond the right edge of the spatial grid, it will immediately "wrap around" and re-enter from the left edge. To avoid these unphysical wrapping artifacts during scattering experiments, the domain size (`L` in the JSON configuration) must be kept sufficiently large to contain the wavepacket for the entire duration of the simulation, rationally picked by taking into account the initialized $\sigma$ value (`"sigma"` in the .json format).
+>
+### Units and Dimensional Scaling
+
+To prevent floating-point underflow and maintain numerical stability, this engine operates in natural computational units where the reduced Planck constant is set to unity ($\hbar = 1$) and the particle mass is scaled relative to the system ($m = 1$). Consequently, all spatial coordinates, time steps, momenta, and potential energies in the JSON configurations are dimensionless and scaled relative to these atomic standard units.
+
 ---
 
 ## Physical Scenarios and Expected Results
@@ -161,4 +166,7 @@ Before running a second simulation, in order to purge the compiled binary, wipe 
 make clean
 
 ```
-
+---
+## Numerical Stability and Limitations
+* **Unitarity Conservation**: Because the Split-Operator method relies on purely phase-shifting operations (complex exponentials), the simulation is strictly unitary. The total probability norm $\int \vert{}\psi(x,t)\vert{}^2 dx = 1$ is perfectly conserved throughout the temporal evolution, independent of the grid resolution.
+* **Spatial Aliasing (Nyquist Limit)**: The physical accuracy of the momentum-space mapping is bound by the spatial grid resolution $\Delta x = L / N$. If a particle acquires an excessively high momentum (either by initialization or by falling into a deep potential well), its de Broglie wavelength may drop below the Nyquist limit ($2\Delta x$). In such regimes, high-frequency aliasing will occur. Users must ensure $N$ is sufficiently large to resolve the maximum expected kinetic energy in their specific JSON scenario.
