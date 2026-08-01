@@ -149,7 +149,7 @@ int main() {
         apply_potential<<<num_blocks, threads_per_block>>>(d_psi, d_V, dt, N);
         
 
-        // Every 100 steps copy d_psi back to h_psi and save it to a file
+        // Every 20 steps copy d_psi back to h_psi and save it to a file
         if (step % 20 == 0) {
             // Move updated array from GPU to CPU
             cudaMemcpy(h_psi.data(), d_psi, N * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
@@ -169,12 +169,12 @@ int main() {
                 total_prob += prob_density * dx; 
                 
                 /* Format for GNUPlot/Matplotlib: "x probability potential" separated by a space
-                   The value for potential is divided by 50 in order to ease the visual representation */
+                   The value for potential is divided by 10 or more in order to ease the visual representation */
                 file << x << " " << prob_density << " " << h_V[j]/10 << "\n";
             }
             file.close();
            
-            // Terminal check to ensure total prob of each pdf is 1
+            // Terminal check to ensure total prob of each pdf (integral over the domain) is 1
             cout << "Step: " << step << " | Norm: " << total_prob << endl;
         }
     }
@@ -185,6 +185,6 @@ int main() {
     cudaFree(d_V);
     cudaFree(d_p);
 
-    cout << "Simulation finished!" << endl;
+    cout << "Simulation finished." << endl;
     return 0;
 }

@@ -35,6 +35,12 @@ def main():
         omega = config["omega"]
         m = config["mass"]
         V = 0.5 * m * omega**2 * x**2
+    elif config["potential_type"] == "well":
+        start = config["well_start"]
+        end = config["well_end"]
+        depth = config["well_depth"]
+        V = np.full(N, depth)
+        V[(x >= start) & (x <= end)] = 0.0
 
     # Initial condition for position wavefunction \psi(x, 0)
     if config["potential_type"] == "oscillator" and "n_level" in config:

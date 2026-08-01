@@ -10,7 +10,7 @@ frames = range(0, step_max, step_interval)
 
 # Figure setup
 fig, ax = plt.subplots(figsize=(8, 5))
-ax.set_xlim(-20, 20)      # Space domain of the schrodinger simulation
+ax.set_xlim(-50, 50)      # Space domain of the schrodinger simulation
 ax.set_ylim(0, 1.0)       # Relative to max height of the packet from pdf gained in the c++ simulation
 ax.set_xlabel("Position (x)")
 ax.set_ylabel("Probability Density Function |ψ|² / Scaled Potential")
