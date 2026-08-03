@@ -4,7 +4,6 @@ import matplotlib.animation as animation
 import os
 import physics_plot
 
-# Apply the academic style sheet globally
 plt.style.use("physics_plot.pp_base")
 
 step_max = 800

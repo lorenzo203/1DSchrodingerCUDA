@@ -81,6 +81,7 @@ A free wavepacket enters a region characterized by a finite, negative potential 
   <img src="assets/well.gif" alt="Quantum Well Simulation" width="700"/>
 </p>
 
+> For consistency, when editing one of the default experiments or creating a new one, make sure to use the same number of evolution steps for the animation script and the physical setup (in the JSON description) in order to avoid any issue.
 ---
 
 ## Architectural Design Choices
@@ -165,7 +166,7 @@ make animate
 
 This will produce a `wavepacket.gif` file in the root directory.
 
-> The publication-quality aesthetic of the quantum wavepacket animations is achieved using the excellent [physics-plot](https://github.com/c0rychu/physics-plot) library. It provides a robust Matplotlib style that enforces $\LaTeX$ math, serif fonts, and a minimalist academic grid out of the box. It is easy, dependency free and aesthetically sound, but this costs a bit in terms of the time required to generate the animation, a price I'm more than willing to pay for this result.
+> The publication-quality aesthetic of the quantum wavepacket animations is achieved using the excellent [physics-plot](https://github.com/c0rychu/physics-plot) library by @c0rychu. It provides a robust Matplotlib style that enforces $\LaTeX$ math, serif fonts, and a minimalist academic grid out of the box. It is easy, dependency free and aesthetically sound, but this costs a bit in terms of the time required to generate the animation, a price I'm more than willing to pay for this result.
 
 ### 3. Clean the Environment
 
