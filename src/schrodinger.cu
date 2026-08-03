@@ -47,7 +47,7 @@ __global__ void apply_kinetic(cuDoubleComplex* d_psi, const double* d_p, double 
 
 int main() {
     // Global params reading
-    ifstream file_params("../data/input/params.dat");
+    ifstream file_params("data/input/params.dat");
     if (!file_params) {
         cerr << "Error: params.dat unavailable. Check Python execution." << endl;
         return 1;
@@ -66,7 +66,7 @@ int main() {
     vector<double> h_p(N); 
 
     // Potential
-    ifstream file_V("../data/input/potential.dat");
+    ifstream file_V("data/input/potential.dat");
     if (!file_V) { cerr << "Error in potential.dat opening" << endl; return 1; }
     for (int j = 0; j < N; j++) {
         file_V >> h_V[j];
@@ -74,7 +74,7 @@ int main() {
     file_V.close();
 
     // Initial Wavefunction
-    ifstream file_psi("../data/input/psi_0.dat");
+    ifstream file_psi("data/input/psi_0.dat");
     if (!file_psi) { cerr << "Error opening psi_0.dat" << endl; return 1; }
     for (int j = 0; j < N; j++) {
         double real_part, imag_part;
@@ -136,7 +136,7 @@ int main() {
         apply_potential<<<num_blocks, threads_per_block>>>(d_psi, d_V, dt, N);
 
         // FFT from position to momentum space
-        // We do it in-place, so idata and odata are both d_psi. Direction is CUFFT_FORWARD.
+        // in-place=> idata and odata are both d_psi. Direction is CUFFT_FORWARD.
         cufftExecZ2Z(plan, d_psi, d_psi, CUFFT_FORWARD);
 
         // Full step of kinetic energy in momentum space
@@ -155,7 +155,7 @@ int main() {
             cudaMemcpy(h_psi.data(), d_psi, N * sizeof(cuDoubleComplex), cudaMemcpyDeviceToHost);
             
             // File preparation (eg: output_0.dat, output_100.dat)
-            string filename = "../data/output/output_" + to_string(step) + ".dat";
+            string filename = "data/output/output_" + to_string(step) + ".dat";
             ofstream file(filename);
             
             double total_prob = 0.0;

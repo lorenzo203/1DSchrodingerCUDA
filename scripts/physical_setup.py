@@ -71,19 +71,19 @@ def main():
     psi_complex = psi_complex / np.sqrt(prob_totale)
 
     # Save data to process it in C++
-    os.makedirs("../data/input", exist_ok=True)
-    os.makedirs("../data/output", exist_ok=True)
+    os.makedirs("data/input", exist_ok=True)
+    os.makedirs("data/output", exist_ok=True)
 
     # Scalar parameters for C++
-    with open("../data/input/params.dat", "w") as f:
+    with open("data/input/params.dat", "w") as f:
         f.write(f"{N} {L} {config['dt']} {config['mass']} {config['num_steps']}\n")
 
     # Potential (1 column)
-    np.savetxt("../data/input/potential.dat", V, fmt="%.8f")
+    np.savetxt("data/input/potential.dat", V, fmt="%.8f")
 
     # psi (2 columns: Real and Imaginary part)
     psi_out = np.column_stack((psi_complex.real, psi_complex.imag))
-    np.savetxt("../data/input/psi_0.dat", psi_out, fmt="%.8f %.8f")
+    np.savetxt("data/input/psi_0.dat", psi_out, fmt="%.8f %.8f")
 
     print(f"Successfully completed setup from {config_file}!")
 

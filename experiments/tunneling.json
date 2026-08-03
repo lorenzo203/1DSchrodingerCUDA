@@ -3,12 +3,12 @@
     "L": 120.0,
     "dt": 0.01,
     "mass": 1.0,
-    "num_steps": 2000,
+    "num_steps": 800,
     "x0": -10.0,
     "sigma": 1.0,
     "p0": 5.0,
     "potential_type": "barrier",
     "barrier_height": 15.0,
     "barrier_start": 0.0,
-    "barrier_end": 2.0
+    "barrier_end": 1.0
 }

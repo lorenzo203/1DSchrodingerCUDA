@@ -1,7 +1,10 @@
 schrodinger
+venv
+.venv
 *.dat
 *.gif
 *.o
 *.a
 *.DS_Store
 !assets/*.gif
+!data/
